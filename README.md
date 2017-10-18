@@ -19,9 +19,9 @@ First, lets assume that we have configured credentials for the master account an
 
 ```toml
 [master]
-region=us-east-1
-aws_access_key_id=XXXX
-aws_secret_access_key=YYYY
+region="us-east-1"
+aws_access_key_id="XXXX"
+aws_secret_access_key="YYYY"
 ```
 
 Now, lets create a new slave account, using [AWS Organizations](https://aws.amazon.com/organizations/):
@@ -52,17 +52,17 @@ Now that we have two Account Id's, we can configure the AWS CLI to talk to each 
 
 ```toml
 [master]
-region=us-east-1
-aws_access_key_id=XXXX
-aws_secret_access_key=YYYY
+region="us-east-1"
+aws_access_key_id="XXXX"
+aws_secret_access_key="YYYY"
 
 [master-slave-a]
-role_arn = arn:aws:iam::<SLAVE A ACCOUNT ID>:role/OrganizationAccountAccessRole
-source_profile = master
+role_arn="arn:aws:iam::<SLAVE A ACCOUNT ID>:role/OrganizationAccountAccessRole"
+source_profile="master"
 
 [master-slave-b]
-role_arn = arn:aws:iam::<SLAVE B ACCOUNT ID>:role/OrganizationAccountAccessRole
-source_profile = master
+role_arn="arn:aws:iam::<SLAVE B ACCOUNT ID>:role/OrganizationAccountAccessRole"
+source_profile="master"
 ```
 
 Your credentials file should now look similar to the above.
