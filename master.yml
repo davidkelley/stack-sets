@@ -1,0 +1,29 @@
+AWSTemplateFormatVersion: 2010-09-09
+
+Description: Implements AWSCloudFormationStackSetAdministrationRole
+
+Resources:
+
+  AdministrationRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: AWSCloudFormationStackSetAdministrationRole
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: !Sub "cloudformation.${AWS::URLSuffix}"
+            Action:
+              - sts:AssumeRole
+      Path: /
+      Policies:
+        - PolicyName: AWSCloudFormationStackSetExecutionRole
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - sts:AssumeRole
+                Resource:
+                  - !Sub "arn:${AWS::Partition}:iam::*:role/AWSCloudFormationStackSetExecutionRole"

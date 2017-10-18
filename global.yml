@@ -1,0 +1,89 @@
+AWSTemplateFormatVersion: '2010-09-09'
+
+Description: Global Region Orchestration
+
+Parameters:
+
+  Region:
+    Type: String
+    Description: Master Account Region
+
+Resources:
+
+  MasterRegion:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: /Master/Region
+      Type: String
+      Value: !Ref Region
+      Description: "Master AWS Region"
+
+  GlobalImportValue:
+    Type: AWS::Lambda::Function
+    Properties:
+      Handler: index.handler
+      Role: !GetAtt GlobalImportValueExecutionRole.Arn
+      Runtime: nodejs6.10
+      Code:
+        # Inline contents of /globalImports.js
+        ZipFile: |
+          const response = require("cfn-response");
+          const AWS = require("aws-sdk");
+          exports.handler = (event, context) => {
+            const { SourceRegion } = event.ResourceProperties;
+            const id = `custom:cloudformation:${SourceRegion}:exports`;
+            const cloudformation = new AWS.CloudFormation({ region: SourceRegion });
+            try {
+              cloudformation.listExports({}, (err, data) => {
+                if (err) {
+                  throw err;
+                } else {
+                  const vals = data.Exports.map(({ Name, Value }) => ([Name, Value]));
+                  const obj = new Map(vals);
+                  response.send(event, context, response.SUCCESS, obj, id);
+                }
+              });
+            } catch (err) {
+              console.error(err.message);
+              response.send(event, context, response.FAILED, {}, id);
+            }
+          };
+
+  GlobalImportValueExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: !Sub "lambda.${AWS::URLSuffix}"
+            Action:
+              - sts:AssumeRole
+      Path: /
+      ManagedPolicyArns:
+        - !Sub "arn:${AWS::Partition}:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+      Policies:
+        - PolicyName: AssumedExecutionRole
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Action:
+                  - cloudformation:ListExports
+                Effect: Allow
+                Resource:
+                  - "*"
+
+Outputs:
+
+  MasterRegion:
+    Description: Master Account Deployment Region
+    Value: !GetAtt MasterRegion.Value
+    Export:
+      Name: MasterRegion
+
+  GlobalImportValueToken:
+    Description: Lambda Function Arn for Global Import
+    Value: !GetAtt GlobalImportValue.Arn
+    Export:
+      Name: GlobalImportValue

@@ -1,0 +1,54 @@
+AWSTemplateFormatVersion: 2010-09-09
+
+Description: Slave Implements AWSCloudFormationStackSetExecutionRole
+
+Parameters:
+
+  MasterAccountId:
+    Type: String
+    Description: AWS Account Id of the administrative account
+    MaxLength: 12
+    MinLength: 12
+
+  MasterRegion:
+    Type: String
+    Description: AWS Account Region of the administrative account
+
+Resources:
+
+  StackSetExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: AWSCloudFormationStackSetExecutionRole
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              AWS:
+                - !Ref MasterAccountId
+            Action:
+              - sts:AssumeRole
+      Path: /
+      ManagedPolicyArns:
+        - !Sub arn:${AWS::Partition}:iam::aws:policy/AdministratorAccess
+
+Outputs:
+
+  MasterAccountId:
+    Value: !Ref MasterAccountId
+    Description: Master AWS Account Id
+    Export:
+      Name: MasterAccountId
+
+  MasterRegion:
+    Value: !Ref MasterRegion
+    Description: Master AWS Region
+    Export:
+      Name: MasterRegion
+
+  GlobalImportServiceArn:
+    Value: !Sub "arn:${AWS::Partition}:${MasterRegion}:${MasterAccountId}:GlobalImportServiceTopic"
+    Description: SNS Topic of GlobalImport Service
+    Export:
+      Name: GlobalImportServiceArn
