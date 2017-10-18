@@ -9,8 +9,8 @@ exports.handler = (event, context) => {
       if (err) {
         throw err;
       } else {
-        const vals = data.Exports.map(({ Name, Value }) => ([Name, Value]));
-        const obj = new Map(vals);
+        const obj = {};
+        data.Exports.forEach(({ Name, Value }) => (obj[Name] = Value));
         response.send(event, context, response.SUCCESS, obj, id);
       }
     });

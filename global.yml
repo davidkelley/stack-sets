@@ -21,6 +21,7 @@ Resources:
   GlobalImportValue:
     Type: AWS::Lambda::Function
     Properties:
+      FunctionName: GlobalImportValue
       Handler: index.handler
       Role: !GetAtt GlobalImportValueExecutionRole.Arn
       Runtime: nodejs6.10
@@ -38,8 +39,8 @@ Resources:
                 if (err) {
                   throw err;
                 } else {
-                  const vals = data.Exports.map(({ Name, Value }) => ([Name, Value]));
-                  const obj = new Map(vals);
+                  const obj = {};
+                  data.Exports.forEach(({ Name, Value }) => (obj[Name] = Value));
                   response.send(event, context, response.SUCCESS, obj, id);
                 }
               });
@@ -48,6 +49,12 @@ Resources:
               response.send(event, context, response.FAILED, {}, id);
             }
           };
+
+  GlobalImportValueLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub "/aws/lambda/${GlobalImportValue}"
+      RetentionInDays: 1
 
   GlobalImportValueExecutionRole:
     Type: AWS::IAM::Role
