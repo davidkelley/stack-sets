@@ -10,10 +10,6 @@ Parameters:
     MaxLength: 12
     MinLength: 12
 
-  MasterRegion:
-    Type: String
-    Description: AWS Account Region of the administrative account
-
 Resources:
 
   StackSetExecutionRole:
@@ -40,15 +36,3 @@ Outputs:
     Description: Master AWS Account Id
     Export:
       Name: MasterAccountId
-
-  MasterRegion:
-    Value: !Ref MasterRegion
-    Description: Master AWS Region
-    Export:
-      Name: MasterRegion
-
-  GlobalImportServiceArn:
-    Value: !Sub "arn:${AWS::Partition}:${MasterRegion}:${MasterAccountId}:GlobalImportServiceTopic"
-    Description: SNS Topic of GlobalImport Service
-    Export:
-      Name: GlobalImportServiceArn
